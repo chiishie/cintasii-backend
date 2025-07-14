@@ -1,39 +1,38 @@
 # app/schemas.py
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List
 
-# --- Lesson Schemas ---
-class LessonBase(BaseModel):
-    title: str
-    content_url: Optional[str] = None
+# These schemas are for reading data from the database and returning it via the API.
 
-class Lesson(LessonBase):
+class LearningTask(BaseModel):
     id: int
+    title: str
+    description: str
+    task_type: str
+    resource_url: str
+    task_order: int
 
     class Config:
         from_attributes = True
 
-# --- Module Schemas ---
-class ModuleBase(BaseModel):
-    title: str
-
-class Module(ModuleBase):
+class LearningModule(BaseModel):
     id: int
-    lessons: List[Lesson] = []
+    title: str
+    module_order: int
+    tasks: List[LearningTask] = []
 
     class Config:
         from_attributes = True
 
-# --- Course Schemas ---
-class CourseBase(BaseModel):
-    title: str
-    description: Optional[str] = None
-
-class Course(CourseBase):
+class LearningTopic(BaseModel):
     id: int
+    name: str
+    description: str
 
     class Config:
         from_attributes = True
 
-class CourseDetail(Course):
-    modules: List[Module] = []
+# This is the main schema for the API response.
+# It inherits from LearningTopic and adds the list of nested modules.
+class LearningTopicDetail(LearningTopic):
+    modules: List[LearningModule] = []
