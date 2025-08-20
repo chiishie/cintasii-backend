@@ -94,7 +94,7 @@ uvicorn app.main:app --reload
   * `uvicorn app.main:app`: Tells the Uvicorn server to run the `app` object from the `main.py` file inside the `app` directory.
   * `--reload`: Enables auto-reload, which automatically restarts the server whenever you save a code change.
 
-The server will now be running at **https://www.google.com/search?q=http://127.0.0.1:8000**.
+The server will now be running at **http://127.0.0.1:8000**.
 
 -----
 
