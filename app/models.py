@@ -1,41 +1,38 @@
 # app/models.py
-from sqlalchemy import Boolean, Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from .database import Base
 
-class User(Base):
-    __tablename__ = "users"
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String)
-    email = Column(String, unique=True, index=True)
-    hashed_password = Column(String) # For future real auth
+class LearningTopic(Base):
+    """Represents a high-level learning goal, e.g., 'Python for Data Science'."""
+    __tablename__ = "learning_topics"
+    id = Column(Integer, primary_key=True)
+    name = Column(String, unique=True, index=True)
+    description = Column(String)
+    # This relationship links a topic to its many modules.
+    modules = relationship("LearningModule", back_populates="topic", cascade="all, delete-orphan")
 
-class Course(Base):
-    __tablename__ = "courses"
-    id = Column(Integer, primary_key=True, index=True)
+class LearningModule(Base):
+    """Represents a logical section of a topic, e.g., 'Week 1: Python Basics'."""
+    __tablename__ = "learning_modules"
+    id = Column(Integer, primary_key=True)
+    title = Column(String)
+    module_order = Column(Integer)
+    topic_id = Column(Integer, ForeignKey("learning_topics.id"))
+    # This links the module back to its parent topic.
+    topic = relationship("LearningTopic", back_populates="modules")
+    # This links a module to its many tasks.
+    tasks = relationship("LearningTask", back_populates="module", cascade="all, delete-orphan")
+
+class LearningTask(Base):
+    """Represents a single, actionable task, e.g., 'Watch a video on Python loops'."""
+    __tablename__ = "learning_tasks"
+    id = Column(Integer, primary_key=True)
     title = Column(String)
     description = Column(String)
-    modules = relationship("Module", back_populates="course")
-
-class Module(Base):
-    __tablename__ = "modules"
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String)
-    course_id = Column(Integer, ForeignKey("courses.id"))
-    course = relationship("Course", back_populates="modules")
-    lessons = relationship("Lesson", back_populates="module")
-
-class Lesson(Base):
-    __tablename__ = "lessons"
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String)
-    content_url = Column(String, nullable=True)
-    module_id = Column(Integer, ForeignKey("modules.id"))
-    module = relationship("Module", back_populates="lessons")
-
-class Progress(Base):
-    __tablename__ = "progress"
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    lesson_id = Column(Integer, ForeignKey("lessons.id"))
-    is_completed = Column(Boolean, default=False)
+    task_type = Column(String)  # "video", "article", "project"
+    resource_url = Column(String)
+    task_order = Column(Integer)
+    module_id = Column(Integer, ForeignKey("learning_modules.id"))
+    # This links the task back to its parent module.
+    module = relationship("LearningModule", back_populates="tasks")
